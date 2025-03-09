@@ -1,0 +1,234 @@
+<!-- @format -->
+
+<!DOCTYPE html>
+<html lang="sv">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Projektlista</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 10px;
+      }
+      th,
+      td {
+        border: 1px solid black;
+        padding: 8px;
+        text-align: left;
+      }
+      th {
+        background-color: #f2f2f2;
+      }
+      .hidden {
+        display: none;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Projektlista</h1>
+
+    <section id="projektListSection">
+      <button onclick="showCreateForm()">Skapa nytt projekt</button>
+      <table>
+        <thead>
+          <tr>
+            <th>Projektnummer</th>
+            <th>Namn</th>
+            <th>Startdatum</th>
+            <th>Slutdatum</th>
+            <th>Projektansvarig</th>
+            <th>Status</th>
+            <th>Detaljer</th>
+          </tr>
+        </thead>
+        <tbody id="projektTable"></tbody>
+      </table>
+    </section>
+
+    <section id="projektDetailSection" class="hidden">
+      <h2>Projektdetaljer</h2>
+      <form id="projektForm">
+        <input type="hidden" id="projektnummer" />
+        <label>Namn: <input type="text" id="namn" /></label><br />
+        <label>Startdatum: <input type="date" id="startdatum" /></label><br />
+        <label>Slutdatum: <input type="date" id="slutdatum" /></label><br />
+        <label>Projektansvarig: <input type="text" id="projektansvarig" /></label><br />
+        <label>Kundnummer: <input type="number" id="kundnummer" disabled /></label><br />
+        <label>TjänstId: <input type="number" id="tjanstId" disabled /></label><br />
+        <label>Totalpris: <input type="number" id="totalpris" /></label><br />
+        <label
+          >Status:
+          <select id="status">
+            <option value="EjPaborjad">Ej Paborjad</option>
+            <option value="Pagaende">Pågående</option>
+            <option value="Avslutad">Avslutad</option>
+          </select> </label
+        ><br />
+        <button type="button" onclick="updateProjekt()">Spara ändringar</button>
+        <button type="button" onclick="showProjektList()">Avbryt</button>
+      </form>
+    </section>
+
+    <section id="projektCreateSection" class="hidden">
+      <h2>Skapa nytt projekt</h2>
+      <form id="createProjektForm">
+        <label>Namn: <input type="text" id="newNamn" /></label><br />
+        <label>Startdatum: <input type="date" id="newStartdatum" /></label><br />
+        <label>Slutdatum: <input type="date" id="newSlutdatum" /></label><br />
+        <label>Projektansvarig: <input type="text" id="newProjektansvarig" /></label><br />
+        <label>Kundnummer: <input type="number" id="newKundnummer" disabled value="1" /></label><br />
+        <label>TjänstId: <input type="number" id="newTjanstId" disabled value="1" /></label><br />
+        <label>Totalpris: <input type="number" id="newTotalpris" /></label><br />
+        <label
+          >Status:
+          <select id="newStatus">
+            <option value="EjPaborjad">Ej Paborjad</option>
+            <option value="Pagaende">Pågående</option>
+            <option value="Avslutad">Avslutad</option>
+          </select> </label
+        ><br />
+        <button type="button" onclick="createProjekt()">Skapa</button>
+        <button type="button" onclick="showProjektList()">Avbryt</button>
+      </form>
+    </section>
+
+    <script>
+      const apiUrl = "https://localhost:7158/api/projekt";
+
+      async function getAllProjekt() {
+        const response = await fetch(apiUrl);
+        const projekt = await response.json();
+        const table = document.getElementById("projektTable");
+        table.innerHTML = "";
+        projekt.forEach((p) => {
+          table.innerHTML += `
+      <tr>
+        <td>${p.projektnummer}</td>
+        <td>${p.namn}</td>
+        <td>${p.startdatum.split("T")[0]}</td>
+        <td>${p.slutdatum ? p.slutdatum.split("T")[0] : "N/A"}</td> 
+        <td>${p.projektansvarig}</td>
+        <td>${getStatusText(p.status)}</td>
+        <td><button onclick="showProjektDetails(${p.projektnummer})">Visa</button></td>
+      </tr>
+    `;
+        });
+      }
+
+      //ChatGPT - mappa enumvärdena så vi får rätt text för statusarna
+      function getStatusText(status) {
+        switch (status) {
+          case "EjPaborjad":
+            return "Ej Påbörjad";
+          case "Pagaende":
+            return "Pågående";
+          case "Avslutad":
+            return "Avslutad";
+        }
+      }
+
+      async function showProjektDetails(projektnummer) {
+        const response = await fetch(`${apiUrl}/${projektnummer}`);
+        const projekt = await response.json();
+
+        document.getElementById("projektnummer").value = projekt.projektnummer;
+        document.getElementById("namn").value = projekt.namn;
+        document.getElementById("startdatum").value = projekt.startdatum.split("T")[0];
+        document.getElementById("slutdatum").value = projekt.slutdatum ? projekt.slutdatum.split("T")[0] : "";
+        document.getElementById("projektansvarig").value = projekt.projektansvarig;
+        document.getElementById("kundnummer").value = 1;
+        document.getElementById("tjanstId").value = 1;
+        document.getElementById("totalpris").value = projekt.totalpris;
+        document.getElementById("status").value = projekt.status;
+
+        document.getElementById("projektListSection").classList.add("hidden");
+        document.getElementById("projektDetailSection").classList.remove("hidden");
+      }
+
+      async function updateProjekt() {
+        const projekt = {
+          projektnummer: document.getElementById("projektnummer").value,
+          namn: document.getElementById("namn").value,
+          startdatum: document.getElementById("startdatum").value + "T00:00:00",
+          slutdatum: document.getElementById("slutdatum").value ? document.getElementById("slutdatum").value + "T00:00:00" : null,
+          projektansvarig: document.getElementById("projektansvarig").value,
+          kundnummer: parseInt(document.getElementById("kundnummer").value),
+          tjanstId: parseInt(document.getElementById("tjanstId").value),
+          totalpris: parseFloat(document.getElementById("totalpris").value),
+          status: getStatusNumericValue(document.getElementById("status").value),
+        };
+
+        const response = await fetch(`${apiUrl}/${projekt.projektnummer}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(projekt),
+        });
+
+        if (response.ok) {
+          alert("Projekt uppdaterat!");
+          showProjektList();
+          getAllProjekt();
+        } else {
+          alert("Ett fel uppstod.");
+        }
+      }
+
+      async function createProjekt() {
+        const projekt = {
+          namn: document.getElementById("newNamn").value,
+          startdatum: document.getElementById("newStartdatum").value,
+          slutdatum: document.getElementById("newSlutdatum").value || null,
+          projektansvarig: document.getElementById("newProjektansvarig").value,
+          kundnummer: document.getElementById("newKundnummer").value,
+          tjanstId: document.getElementById("newTjanstId").value,
+          totalpris: document.getElementById("newTotalpris").value,
+          status: getStatusNumericValue(document.getElementById("newStatus").value),
+        };
+
+        const response = await fetch(apiUrl, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(projekt),
+        });
+
+        if (response.ok) {
+          alert("Projekt skapat!");
+          showProjektList();
+          getAllProjekt();
+        } else {
+          alert("Ett fel uppstod.");
+        }
+      }
+
+      //ChatGPT - servern förväntar sig en siffra för statusvärdena, vi mappar till rätt siffra här
+      function getStatusNumericValue(statusText) {
+        switch (statusText) {
+          case "EjPaborjad":
+            return 0;
+          case "Pagaende":
+            return 1;
+          case "Avslutad":
+            return 2;
+        }
+      }
+
+      function showCreateForm() {
+        document.getElementById("projektListSection").classList.add("hidden");
+        document.getElementById("projektCreateSection").classList.remove("hidden");
+      }
+
+      function showProjektList() {
+        document.getElementById("projektListSection").classList.remove("hidden");
+        document.getElementById("projektDetailSection").classList.add("hidden");
+        document.getElementById("projektCreateSection").classList.add("hidden");
+      }
+
+      getAllProjekt();
+    </script>
+  </body>
+</html>

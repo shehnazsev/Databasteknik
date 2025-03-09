@@ -1,0 +1,85 @@
+[
+  {
+    "ContainingType": "ProjektController",
+    "Method": "Get",
+    "RelativePath": "api/Projekt",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": [
+      {
+        "Type": "System.Collections.Generic.IEnumerable\u00601[[Data.Models.Projekt, Data, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]",
+        "MediaTypes": [
+          "text/plain",
+          "application/json",
+          "text/json"
+        ],
+        "StatusCode": 200
+      }
+    ]
+  },
+  {
+    "ContainingType": "ProjektController",
+    "Method": "Post",
+    "RelativePath": "api/Projekt",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "projekt",
+        "Type": "Data.Models.Projekt",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "ProjektController",
+    "Method": "GetProjekt",
+    "RelativePath": "api/Projekt/{projektnummer}",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "projektnummer",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": [
+      {
+        "Type": "Data.Models.Projekt",
+        "MediaTypes": [
+          "text/plain",
+          "application/json",
+          "text/json"
+        ],
+        "StatusCode": 200
+      }
+    ]
+  },
+  {
+    "ContainingType": "ProjektController",
+    "Method": "Put",
+    "RelativePath": "api/Projekt/{projektnummer}",
+    "HttpMethod": "PUT",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "projektnummer",
+        "Type": "System.Int32",
+        "IsRequired": true
+      },
+      {
+        "Name": "projekt",
+        "Type": "Data.Models.Projekt",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  }
+]
